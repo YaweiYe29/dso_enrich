@@ -55,6 +55,7 @@ std::string vignette = "";
 std::string gammaCalib = "";
 std::string source = "";
 std::string calib = "";
+std::string datasetType = "";
 double rescale = 1;
 bool reverse = false;
 bool disableROS = false;
@@ -264,6 +265,13 @@ void parseArgument(char* arg)
 		return;
 	}
 
+   if(1==sscanf(arg,"dataset=%s", buf))
+	{
+		datasetType = buf;
+		printf("using %s dataset!\n", datasetType.c_str());
+		return;
+	}
+
 	if(1==sscanf(arg,"files=%s",buf))
 	{
 		source = buf;
@@ -362,7 +370,7 @@ int main( int argc, char** argv )
 	boost::thread exThread = boost::thread(exitThread);
 
 
-	ImageFolderReader* reader = new ImageFolderReader(source,calib, gammaCalib, vignette);
+	ImageFolderReader* reader = new ImageFolderReader(datasetType, source, calib, gammaCalib, vignette);
 	reader->setGlobalCalibration();
 
 
