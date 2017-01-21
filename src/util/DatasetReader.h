@@ -102,7 +102,8 @@ struct PrepImageItem
 class ImageFolderReader
 {
 public:
-	ImageFolderReader(std::string path, std::string calibFile, std::string gammaFile, std::string vignetteFile)
+	ImageFolderReader(std::string datasetType, std::string path,
+			std::string calibFile, std::string gammaFile, std::string vignetteFile)
 	{
 		this->path = path;
 		this->calibfile = calibFile;
@@ -160,7 +161,7 @@ public:
 
 
 		// load timestamps if possible.
-		loadTimestamps();
+		loadTimestamps(datasetType);
 		printf("ImageFolderReader: got %d files in %s!\n", (int)files.size(), path.c_str());
 
 	}
@@ -291,33 +292,43 @@ private:
 		return ret2;
 	}
 
-	inline void loadTimestamps()
+	inline void loadTimestamps(const std::string datasetType)
 	{
 		std::ifstream tr;
-		std::string timesFile = path.substr(0,path.find_last_of('/')) + "/times.txt";
-		tr.open(timesFile.c_str());
-		while(!tr.eof() && tr.good())
+
+		if (datasetType == "robotcar")
 		{
-			std::string line;
-			char buf[1000];
-			tr.getline(buf, 1000);
 
-			int id;
-			double stamp;
-			float exposure = 0;
-
-			if(3 == sscanf(buf, "%d %lf %f", &id, &stamp, &exposure))
+			std::string timesFile = path.substr(0,path.find_last_of('/')) + "/../../../stereo.timestamps";
+			tr.open(timesFile.c_str());
+			while(!tr.eof() && tr.good())
 			{
-				timestamps.push_back(stamp);
-				exposures.push_back(exposure);
-			}
+				std::string line;
+				char buf[1000];
+				tr.getline(buf, 1000);
 
-			else if(2 == sscanf(buf, "%d %lf", &id, &stamp))
-			{
-				timestamps.push_back(stamp);
-				exposures.push_back(exposure);
+				int mission_id;
+				double timestamp_mus;
+				float exposure = 0;
+
+				if(2 == sscanf(buf, "%lf %d", &timestamp_mus, &mission_id))
+				{
+					timestamps.push_back(timestamp_mus * 1e-6);
+					exposures.push_back(exposure);
+				}
+				else
+				{
+					printf("ERROR: unknown timestamp format.");
+					exit(1);
+				}
 			}
 		}
+		else
+		{
+			printf("ERROR: unknown dataset type.");
+			exit(1);
+		}
+
 		tr.close();
 
 		// check if exposures are correct, (possibly skip)

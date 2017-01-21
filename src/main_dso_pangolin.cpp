@@ -1,6 +1,6 @@
 /**
 * This file is part of DSO.
-* 
+*
 * Copyright 2016 Technical University of Munich and Intel.
 * Developed by Jakob Engel <engelj at in dot tum dot de>,
 * for more information see <http://vision.in.tum.de/dso>.
@@ -21,8 +21,6 @@
 * along with DSO. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include <thread>
 #include <locale.h>
 #include <signal.h>
@@ -32,7 +30,6 @@
 
 #include "IOWrapper/Output3DWrapper.h"
 #include "IOWrapper/ImageDisplay.h"
-
 
 #include <boost/thread.hpp>
 #include "util/settings.h"
@@ -45,33 +42,31 @@
 #include "OptimizationBackend/MatrixAccumulators.h"
 #include "FullSystem/PixelSelector2.h"
 
-
-
 #include "IOWrapper/Pangolin/PangolinDSOViewer.h"
 #include "IOWrapper/OutputWrapper/SampleOutputWrapper.h"
-
 
 std::string vignette = "";
 std::string gammaCalib = "";
 std::string source = "";
 std::string calib = "";
+std::string datasetType = "";
 double rescale = 1;
 bool reverse = false;
 bool disableROS = false;
 int start=0;
 int end=100000;
 bool prefetch = false;
-float playbackSpeed=0;	// 0 for linearize (play as fast as possible, while sequentializing tracking & mapping). otherwise, factor on timestamps.
+float playbackSpeed=0;	// 0 for linearize (play as fast as possible, while
+						// sequentializing tracking & mapping).
+						// otherwise, factor on timestamps.
 bool preload=false;
 bool useSampleOutput=false;
-
 
 int mode=0;
 
 bool firstRosSpin=false;
 
 using namespace dso;
-
 
 void my_exit_handler(int s)
 {
@@ -90,8 +85,6 @@ void exitThread()
 	firstRosSpin=true;
 	while(true) pause();
 }
-
-
 
 void settingsDefault(int preset)
 {
@@ -264,6 +257,13 @@ void parseArgument(char* arg)
 		return;
 	}
 
+   if(1==sscanf(arg,"dataset=%s", buf))
+	{
+		datasetType = buf;
+		printf("using %s dataset!\n", datasetType.c_str());
+		return;
+	}
+
 	if(1==sscanf(arg,"files=%s",buf))
 	{
 		source = buf;
@@ -311,10 +311,18 @@ void parseArgument(char* arg)
 		if(option==1)
 		{
 			debugSaveImages = true;
-			if(42==system("rm -rf images_out")) printf("system call returned 42 - what are the odds?. This is only here to shut up the compiler.\n");
-			if(42==system("mkdir images_out")) printf("system call returned 42 - what are the odds?. This is only here to shut up the compiler.\n");
-			if(42==system("rm -rf images_out")) printf("system call returned 42 - what are the odds?. This is only here to shut up the compiler.\n");
-			if(42==system("mkdir images_out")) printf("system call returned 42 - what are the odds?. This is only here to shut up the compiler.\n");
+			if(42==system("rm -rf images_out"))
+				printf("system call returned 42 - what are the odds?. "
+						"This is only here to shut up the compiler.\n");
+			if(42==system("mkdir images_out"))
+				printf("system call returned 42 - what are the odds?. "
+						"This is only here to shut up the compiler.\n");
+			if(42==system("rm -rf images_out"))
+				printf("system call returned 42 - what are the odds?. "
+						"This is only here to shut up the compiler.\n");
+			if(42==system("mkdir images_out"))
+				printf("system call returned 42 - what are the odds?. "
+						"This is only here to shut up the compiler.\n");
 			printf("SAVE IMAGES!\n");
 		}
 		return;
@@ -349,8 +357,6 @@ void parseArgument(char* arg)
 	printf("could not parse argument \"%s\"!!!!\n", arg);
 }
 
-
-
 int main( int argc, char** argv )
 {
 	//setlocale(LC_ALL, "");
@@ -362,19 +368,16 @@ int main( int argc, char** argv )
 	boost::thread exThread = boost::thread(exitThread);
 
 
-	ImageFolderReader* reader = new ImageFolderReader(source,calib, gammaCalib, vignette);
+	ImageFolderReader* reader = new ImageFolderReader(datasetType, source,
+			calib, gammaCalib, vignette);
 	reader->setGlobalCalibration();
-
-
 
 	if(setting_photometricCalibration > 0 && reader->getPhotometricGamma() == 0)
 	{
-		printf("ERROR: dont't have photometric calibation. Need to use commandline options mode=1 or mode=2 ");
+		printf("ERROR: dont't have photometric calibation. Need to use "
+				"commandline options mode=1 or mode=2 ");
 		exit(1);
 	}
-
-
-
 
 	int lstart=start;
 	int lend = end;
@@ -389,17 +392,9 @@ int main( int argc, char** argv )
 		linc = -1;
 	}
 
-
-
 	FullSystem* fullSystem = new FullSystem();
 	fullSystem->setGammaFunction(reader->getPhotometricGamma());
 	fullSystem->linearizeOperation = (playbackSpeed==0);
-
-
-
-
-
-
 
     IOWrap::PangolinDSOViewer* viewer = 0;
 	if(!disableAllDisplay)
@@ -408,13 +403,8 @@ int main( int argc, char** argv )
         fullSystem->outputWrapper.push_back(viewer);
     }
 
-
-
     if(useSampleOutput)
         fullSystem->outputWrapper.push_back(new IOWrap::SampleOutputWrapper());
-
-
-
 
     // to make MacOS happy: run this in dedicated thread -- and use this one to run the GUI.
     std::thread runthread([&]() {
@@ -434,7 +424,6 @@ int main( int argc, char** argv )
                 timesToPlayAt.push_back(timesToPlayAt.back() +  fabs(tsThis-tsPrev)/playbackSpeed);
             }
         }
-
 
         std::vector<ImageAndExposure*> preloadedImages;
         if(preload)
@@ -464,36 +453,31 @@ int main( int argc, char** argv )
 
             int i = idsToPlay[ii];
 
-
             ImageAndExposure* img;
             if(preload)
                 img = preloadedImages[ii];
             else
                 img = reader->getImage(i);
 
-
-
             bool skipFrame=false;
             if(playbackSpeed!=0)
             {
                 struct timeval tv_now; gettimeofday(&tv_now, NULL);
-                double sSinceStart = sInitializerOffset + ((tv_now.tv_sec-tv_start.tv_sec) + (tv_now.tv_usec-tv_start.tv_usec)/(1000.0f*1000.0f));
+                double sSinceStart = sInitializerOffset +
+                		((tv_now.tv_sec-tv_start.tv_sec) +
+						(tv_now.tv_usec-tv_start.tv_usec)/(1000.0f*1000.0f));
 
                 if(sSinceStart < timesToPlayAt[ii])
                     usleep((int)((timesToPlayAt[ii]-sSinceStart)*1000*1000));
                 else if(sSinceStart > timesToPlayAt[ii]+0.5+0.1*(ii%2))
                 {
-                    printf("SKIPFRAME %d (play at %f, now it is %f)!\n", ii, timesToPlayAt[ii], sSinceStart);
+                    printf("SKIPFRAME %d (play at %f, now it is %f)!\n",
+                    		ii, timesToPlayAt[ii], sSinceStart);
                     skipFrame=true;
                 }
             }
 
-
-
             if(!skipFrame) fullSystem->addActiveFrame(img, i);
-
-
-
 
             delete img;
 
@@ -536,9 +520,13 @@ int main( int argc, char** argv )
 
 
         int numFramesProcessed = abs(idsToPlay[0]-idsToPlay.back());
-        double numSecondsProcessed = fabs(reader->getTimestamp(idsToPlay[0])-reader->getTimestamp(idsToPlay.back()));
+        double numSecondsProcessed = fabs(reader->getTimestamp(idsToPlay[0]) -
+        		reader->getTimestamp(idsToPlay.back()));
         double MilliSecondsTakenSingle = 1000.0f*(ended-started)/(float)(CLOCKS_PER_SEC);
-        double MilliSecondsTakenMT = sInitializerOffset + ((tv_end.tv_sec-tv_start.tv_sec)*1000.0f + (tv_end.tv_usec-tv_start.tv_usec)/1000.0f);
+        double MilliSecondsTakenMT = sInitializerOffset +
+        		((tv_end.tv_sec-tv_start.tv_sec)*1000.0f +
+				(tv_end.tv_usec-tv_start.tv_usec)/1000.0f);
+
         printf("\n======================"
                 "\n%d Frames (%.1f fps)"
                 "\n%.2fms per frame (single core); "
@@ -556,8 +544,11 @@ int main( int argc, char** argv )
         {
             std::ofstream tmlog;
             tmlog.open("logs/time.txt", std::ios::trunc | std::ios::out);
-            tmlog << 1000.0f*(ended-started)/(float)(CLOCKS_PER_SEC*reader->getNumImages()) << " "
-                  << ((tv_end.tv_sec-tv_start.tv_sec)*1000.0f + (tv_end.tv_usec-tv_start.tv_usec)/1000.0f) / (float)reader->getNumImages() << "\n";
+            tmlog << 1000.0f*(ended-started)/
+            		(float)(CLOCKS_PER_SEC*reader->getNumImages()) << " "
+                  << ((tv_end.tv_sec-tv_start.tv_sec)*1000.0f +
+				  (tv_end.tv_usec-tv_start.tv_usec)/1000.0f) /
+				  (float)reader->getNumImages() << "\n";
             tmlog.flush();
             tmlog.close();
         }
@@ -575,8 +566,6 @@ int main( int argc, char** argv )
 		ow->join();
 		delete ow;
 	}
-
-
 
 	printf("DELETE FULLSYSTEM!\n");
 	delete fullSystem;

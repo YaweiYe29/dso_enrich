@@ -37,14 +37,16 @@ public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 	int id; 			// INTERNAL ID, starting at zero.
 	int incoming_id;	// ID passed into DSO
-	double timestamp;		// timestamp passed into DSO.
+	double timestamp;	// timestamp passed into DSO.
 
 	// set once after tracking
 	SE3 camToTrackingRef;
 	FrameShell* trackingRef;
 
 	// constantly adapted.
-	SE3 camToWorld;				// Write: TRACKING, while frame is still fresh; MAPPING: only when locked [shellPoseMutex].
+	// Write: TRACKING, while frame is still fresh;
+	// MAPPING: only when locked [shellPoseMutex].
+	SE3 camToWorld;
 	AffLight aff_g2l;
 	bool poseValid;
 
