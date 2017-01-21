@@ -81,38 +81,41 @@ public:
         {
             for(FrameHessian* f : frames)
             {
-                printf("OUT: KF %d (%s) (id %d, tme %f): %d active, "
-                		"%d marginalized, %d immature points. CameraToWorld:\n",
-                       f->frameID,
-                       final ? "final" : "non-final",
-                       f->shell->incoming_id,
-                       f->shell->timestamp,
-                       (int)f->pointHessians.size(),
-					   (int)f->pointHessiansMarginalized.size(),
-					   (int)f->immaturePoints.size());
-                std::cout << f->shell->camToWorld.matrix3x4() << "\n";
+            	if (final == true)
+            	{
+					printf("OUT: KF %d (%s) (id %d, tme %f): %d active, "
+							"%d marginalized, %d immature points. CameraToWorld:\n",
+						   f->frameID,
+						   final ? "final" : "non-final",
+						   f->shell->incoming_id,
+						   f->shell->timestamp,
+						   (int)f->pointHessians.size(),
+						   (int)f->pointHessiansMarginalized.size(),
+						   (int)f->immaturePoints.size());
+					std::cout << f->shell->camToWorld.matrix3x4() << "\n";
 
-                int maxWrite = 5;
-                for(PointHessian* p : f->pointHessians)
-                {
-                    printf("OUT: Example Point x=%.1f, y=%.1f, idepth=%f, "
-                    		"idepth std.dev. %f, %d inlier-residuals\n",
-                           p->u, p->v, p->idepth_scaled,
-						   sqrt(1.0f / p->idepth_hessian),
-						   p->numGoodResiduals );
-                    maxWrite--;
-                    if(maxWrite==0) break;
-                }
+					int maxWrite = 5;
+					for(PointHessian* p : f->pointHessians)
+					{
+						printf("OUT: Example Point x=%.1f, y=%.1f, idepth=%f, "
+								"idepth std.dev. %f, %d inlier-residuals\n",
+							   p->u, p->v, p->idepth_scaled,
+							   sqrt(1.0f / p->idepth_hessian),
+							   p->numGoodResiduals );
+						maxWrite--;
+						if(maxWrite==0) break;
+					}
+            	}
             }
         }
 
         virtual void publishCamPose(FrameShell* frame, CalibHessian* HCalib)
         {
-            printf("OUT: Current Frame %d (time %f, internal ID %d). CameraToWorld:\n",
-                   frame->incoming_id,
-                   frame->timestamp,
-                   frame->id);
-            std::cout << frame->camToWorld.matrix3x4() << "\n";
+//            printf("OUT: Current Frame %d (time %f, internal ID %d). CameraToWorld:\n",
+//                   frame->incoming_id,
+//                   frame->timestamp,
+//                   frame->id);
+//            std::cout << frame->camToWorld.matrix3x4() << "\n";
         }
 
 
@@ -156,8 +159,6 @@ public:
                 if(maxWrite==0) break;
             }
         }
-
-
 };
 
 

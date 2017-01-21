@@ -244,12 +244,6 @@ private:
 	long int statistics_numMargResBwd;
 	float statistics_lastFineTrackRMSE;
 
-
-
-
-
-
-
 	// =================== changed by tracker-thread. protected by trackMutex ============
 	boost::mutex trackMutex;
 	std::vector<FrameShell*> allFrameHistory;
@@ -275,17 +269,12 @@ private:
 
 	std::vector<float> allResVec;
 
-
-
 	// mutex etc. for tracker exchange.
 	boost::mutex coarseTrackerSwapMutex;			// if tracker sees that there is a new reference, tracker locks [coarseTrackerSwapMutex] and swaps the two.
 	CoarseTracker* coarseTracker_forNewKF;			// set as as reference. protected by [coarseTrackerSwapMutex].
 	CoarseTracker* coarseTracker;					// always used to track new frames. protected by [trackMutex].
 	float minIdJetVisTracker, maxIdJetVisTracker;
 	float minIdJetVisDebug, maxIdJetVisDebug;
-
-
-
 
 
 	// mutex for camToWorl's in shells (these are always in a good configuration).
