@@ -887,14 +887,8 @@ void FullSystem::addActiveFrame( ImageAndExposure* image, int id )
 
 		}
 
-
-
-
         for(IOWrap::Output3DWrapper* ow : outputWrapper)
             ow->publishCamPose(fh->shell, &Hcalib);
-
-
-
 
 		lock.unlock();
 		deliverTrackedFrame(fh, needToMakeKF);

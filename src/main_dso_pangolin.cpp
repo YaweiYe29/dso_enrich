@@ -137,17 +137,11 @@ void settingsDefault(int preset)
 	printf("==============================================\n");
 }
 
-
-
-
-
-
 void parseArgument(char* arg)
 {
 	int option;
 	float foption;
 	char buf[1000];
-
 
     if(1==sscanf(arg,"sampleoutput=%d",&option))
     {
@@ -208,6 +202,7 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
 	if(1==sscanf(arg,"reverse=%d",&option))
 	{
 		if(option==1)
@@ -217,6 +212,7 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
 	if(1==sscanf(arg,"nogui=%d",&option))
 	{
 		if(option==1)
@@ -226,6 +222,7 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
 	if(1==sscanf(arg,"nomt=%d",&option))
 	{
 		if(option==1)
@@ -235,6 +232,7 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
 	if(1==sscanf(arg,"prefetch=%d",&option))
 	{
 		if(option==1)
@@ -244,12 +242,14 @@ void parseArgument(char* arg)
 		}
 		return;
 	}
+
 	if(1==sscanf(arg,"start=%d",&option))
 	{
 		start = option;
 		printf("START AT %d!\n",start);
 		return;
 	}
+
 	if(1==sscanf(arg,"end=%d",&option))
 	{
 		end = option;
@@ -366,7 +366,6 @@ int main( int argc, char** argv )
 
 	// hook crtl+C.
 	boost::thread exThread = boost::thread(exitThread);
-
 
 	ImageFolderReader* reader = new ImageFolderReader(datasetType, source,
 			calib, gammaCalib, vignette);
@@ -508,16 +507,13 @@ int main( int argc, char** argv )
                     printf("LOST!!\n");
                     break;
             }
-
         }
         fullSystem->blockUntilMappingIsFinished();
         clock_t ended = clock();
         struct timeval tv_end;
         gettimeofday(&tv_end, NULL);
 
-
         fullSystem->printResult("result.txt");
-
 
         int numFramesProcessed = abs(idsToPlay[0]-idsToPlay.back());
         double numSecondsProcessed = fabs(reader->getTimestamp(idsToPlay[0]) -
@@ -552,7 +548,6 @@ int main( int argc, char** argv )
             tmlog.flush();
             tmlog.close();
         }
-
     });
 
 
