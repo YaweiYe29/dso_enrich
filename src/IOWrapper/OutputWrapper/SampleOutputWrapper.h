@@ -111,11 +111,11 @@ public:
 
         virtual void publishCamPose(FrameShell* frame, CalibHessian* HCalib)
         {
-//            printf("OUT: Current Frame %d (time %f, internal ID %d). CameraToWorld:\n",
-//                   frame->incoming_id,
-//                   frame->timestamp,
-//                   frame->id);
-//            std::cout << frame->camToWorld.matrix3x4() << "\n";
+            printf("OUT: Current Frame %d (time %f, internal ID %d). CameraToWorld:\n",
+                   frame->incoming_id,
+                   frame->timestamp,
+                   frame->id);
+            std::cout << frame->camToWorld.matrix3x4() << "\n";
         }
 
 
