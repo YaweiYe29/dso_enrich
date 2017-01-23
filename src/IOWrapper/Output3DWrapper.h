@@ -196,10 +196,6 @@ public:
     {
     }
 
-    virtual void printPointCloud(std::string file)
-    {
-    }
-
     /* call on finish */
     virtual void join()
     {
