@@ -191,11 +191,6 @@ public:
     {
     }
 
-    virtual void printKeyframePoses(const std::string file,
-            const FrameShell &frame)
-    {
-    }
-
     /* call on finish */
     virtual void join()
     {
