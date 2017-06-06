@@ -30,7 +30,10 @@ else:
     bag_files = glob.glob(prefix + "/*.bag")
 
 def get_filename(i):
-  return folder_name + "/frame_" + str(i).zfill(5)  + ".png"
+  return folder_name + "/" + str(get_timestamp(i))  + ".png"
+
+def get_timestamp(i):
+  return i.to_nsec()
 
 for bag_file in bag_files:
     print "Processing file: " + bag_file
@@ -45,30 +48,35 @@ for bag_file in bag_files:
 
     i = 0
     with rosbag.Bag(bag_file, 'r') as bag:
-        for topic, msg, t in bag.read_messages():
-            if topic == topic_name:
-                try:
-                    image_type = msg.encoding
-                    cv_image = bridge.imgmsg_to_cv2(msg, image_type)
-                except CvBridgeError, e:
-                    print e
-
-                if target_framerate > 0.:
-                  if i==0:
-                    first_timestamp = msg.header.stamp
-                    cv2.imwrite(get_filename(i), cv_image)
-                    i = i + 1
-                  else:
-                    diff = msg.header.stamp - first_timestamp
-                    last_timestamp = msg.header.stamp
-
-                    while i/target_framerate < diff.to_sec():
-                      cv2.imwrite(get_filename(i), cv_image)
+        with open(folder_name + '/timestamps.txt', 'w') as timestampfile:
+            for topic, msg, t in bag.read_messages():
+                if topic == topic_name:
+                    try:
+                        image_type = msg.encoding
+                        cv_image = bridge.imgmsg_to_cv2(msg, image_type)
+                    except CvBridgeError, e:
+                        print e
+    
+                    if target_framerate > 0.:
+                      if i==0:
+                        first_timestamp = msg.header.stamp
+                        cv2.imwrite(get_filename(msg.header.stamp), cv_image)
+                        timestampfile.write('%d' % msg.header.stamp)
+                        i = i + 1
+                      else:
+                        diff = msg.header.stamp - first_timestamp
+                        last_timestamp = msg.header.stamp
+    
+                        while i/target_framerate < diff.to_sec():
+                          cv2.imwrite(get_filename(msg.header.stamp), cv_image)
+                          timestampfile.write('%d' % msg.header.stamp)
+                          i = i + 1
+    
+                    else:
+                      cv2.imwrite(get_filename(msg.header.stamp), cv_image)
+                      timestampfile.write('%d\n' % msg.header.stamp.to_nsec())
                       i = i + 1
-
-                else:
-                  cv2.imwrite(get_filename(i), cv_image)
-                  i = i + 1
+        timestampfile.close()
 
     print "Wrote " + str(i) + " images into " + folder_name
     if target_framerate > 0.:
