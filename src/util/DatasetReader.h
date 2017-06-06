@@ -284,13 +284,11 @@ private:
     inline void loadTimestamps(const std::string datasetType)
     {
         std::ifstream tr;
-
         if (datasetType == "robotcar")
         {
-
-            std::string timesFile = path.substr(0, path.find_last_of('/'))
+            std::string timestemps_file = path.substr(0, path.find_last_of('/'))
                     + "/../../../stereo.timestamps";
-            tr.open(timesFile.c_str());
+            tr.open(timestemps_file.c_str());
             while (!tr.eof() && tr.good())
             {
                 std::string line;
@@ -305,14 +303,43 @@ private:
                 {
                     timestamps.push_back(timestamp_mus * 1e-6);
                     exposures.push_back(exposure);
-                } else
+                } 
+                else
                 {
                     printf("ERROR: unknown timestamp format.");
                     exit(1);
                 }
             }
-        } else
+        } 
+        else if(datasetType == "enrich")
         {
+            std::string timestemps_file = path.substr(0, path.find_last_of('/'))
+                    + "/timestamps/timestamps.txt";
+            std::cout<<timestemps_file<<std::endl;
+            tr.open(timestemps_file.c_str());
+            while (!tr.eof() && tr.good())
+            {
+                std::string line;
+                char buf[1000];
+                tr.getline(buf, 1000);
+
+                double timestamp_nsec;
+                float exposure = 0;
+
+                if (1 == sscanf(buf, "%lf", &timestamp_nsec))
+                {
+
+                    timestamps.push_back(timestamp_nsec * 1e-9);
+                    exposures.push_back(exposure);
+                } 
+                else
+                {
+                    printf("ERROR: unknown timestamp format.");
+                    exit(1);
+                }
+            }
+        }
+        else{
             printf("ERROR: unknown dataset type.");
             exit(1);
         }
